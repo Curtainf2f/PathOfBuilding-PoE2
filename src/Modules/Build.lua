@@ -423,8 +423,22 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 		self.viewMode = "PARTY"
 	end)
 	self.controls.modeParty.locked = function() return self.viewMode == "PARTY" end
+
+	self.weightEval = new("WeightEval")
+	self.controls.weightEvalButton = new("ButtonControl", {"LEFT",self.anchorSideBar,"RIGHT"}, {0, 80, 300, 16}, "^7Adjust weights", function()
+		self.weightEval:SetStatWeights()
+	end)
+	self.controls.weightEvalButton.tooltipFunc = function(tooltip)
+		tooltip:Clear()
+		tooltip:AddLine(16, "Sorts the weights by the stats selected multiplied by a value")
+		tooltip:AddLine(16, "Currently sorting by:")
+		for _, stat in ipairs(self.weightEval.statSortSelectionList) do
+			tooltip:AddLine(16, s_format("%s: %.2f", stat.label, stat.weightMult))
+		end
+	end
+
 	-- Skills
-	self.controls.mainSkillLabel = new("LabelControl", {"TOPLEFT",self.anchorSideBar,"TOPLEFT"}, {0, 80, 300, 16}, "^7Main Skill:")
+	self.controls.mainSkillLabel = new("LabelControl", {"TOPLEFT",self.controls.weightEvalButton,"TOPLEFT"}, {0, 16, 300, 16}, "^7Main Skill:")
 	self.controls.mainSocketGroup = new("DropDownControl", {"TOPLEFT",self.controls.mainSkillLabel,"BOTTOMLEFT"}, {0, 2, 300, 18}, nil, function(index, value)
 		self.mainSocketGroup = index
 		self.modFlag = true
@@ -586,6 +600,7 @@ function buildMode:Init(dbFileName, buildName, buildXML, convertBuild, importLin
 		["Skills"] = self.skillsTab,
 		["Calcs"] = self.calcsTab,
 		["Import"] = self.importTab,
+		["WeightEval"] = self.weightEval
 	}
 	self.legacyLoaders = { -- Special loaders for legacy sections
 		["Spec"] = self.treeTab,
@@ -1057,6 +1072,7 @@ function buildMode:ResetModFlags()
 	self.skillsTab.modFlag = false
 	self.itemsTab.modFlag = false
 	self.calcsTab.modFlag = false
+	self.weightEval.modFlag = false
 end
 
 function buildMode:OnFrame(inputEvents)
@@ -1172,7 +1188,7 @@ function buildMode:OnFrame(inputEvents)
 		self.calcsTab:Draw(tabViewPort, inputEvents)
 	end
 
-	self.unsaved = self.modFlag or self.notesTab.modFlag or self.partyTab.modFlag or self.configTab.modFlag or self.treeTab.modFlag or self.treeTab.searchFlag or self.spec.modFlag or self.skillsTab.modFlag or self.itemsTab.modFlag or self.calcsTab.modFlag
+	self.unsaved = self.modFlag or self.notesTab.modFlag or self.partyTab.modFlag or self.configTab.modFlag or self.treeTab.modFlag or self.treeTab.searchFlag or self.spec.modFlag or self.skillsTab.modFlag or self.itemsTab.modFlag or self.calcsTab.modFlag or self.weightEval.modFlag
 
 	SetDrawLayer(5)
 
@@ -1746,6 +1762,9 @@ function buildMode:AddStatComparesToTooltip(tooltip, baseOutput, compareOutput, 
 		end
 	end
 	count = count + self:CompareStatList(tooltip, self.displayStats, self.calcsTab.mainEnv.player, baseOutput, compareOutput, header, nodeCount)
+	local weight = self.weightEval:WeightedOutputs(baseOutput, compareOutput)
+	local color = weight >= 0 and colorCodes.POSITIVE or colorCodes.NEGATIVE
+	tooltip:AddLine(14, s_format("%s-----[weight %f]-----", color, weight))
 	return count
 end
 
