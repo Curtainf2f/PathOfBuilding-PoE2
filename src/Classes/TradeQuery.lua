@@ -19,6 +19,8 @@ local s_format = string.format
 local baseSlots = { "Weapon 1", "Weapon 2", "Helmet", "Body Armour", "Gloves", "Boots", "Amulet", "Ring 1", "Ring 2", "Belt", "Charm 1", "Charm 2", "Charm 3", "Flask 1", "Flask 2" }
 
 local TradeQueryClass = newClass("TradeQuery", function(self, itemsTab)
+	self.usingCustomWeightEval = true
+
 	self.itemsTab = itemsTab
 	self.itemsTab.leagueDropList = { }
 	self.totalPrice = { }
@@ -799,6 +801,25 @@ function TradeQueryClass:SortFetchResults(row_idx, mode)
 		return out
 	end
 	local newTbl = {}
+
+	if self.usingCustomWeightEval then
+		local function getWeightedOutputs(result_index)
+			if not calcFunc then
+				calcFunc, baseOutput = self.itemsTab.build.calcsTab:GetMiscCalculator()
+			end
+			local result = self.resultTbl[row_idx][result_index]
+			local slotName = self.slotTables[row_idx].nodeId and "Jewel " .. tostring(self.slotTables[row_idx].nodeId) or self.slotTables[row_idx].slotName
+			local item = new("Item", result.item_string)
+			local output = calcFunc({ repSlotName = slotName, repItem = item })
+			return self.itemsTab.build.weightEval:WeightedOutputs(baseOutput, output)
+		end
+		for result_index = 1, #self.resultTbl[row_idx] do
+			t_insert(newTbl, { outputAttr = getWeightedOutputs(result_index), index = result_index })
+		end
+		table.sort(newTbl, function(a,b) return a.outputAttr > b.outputAttr end)
+		return newTbl
+	end
+
 	if mode == self.sortModes.Weight then
 		for index, _ in pairs(self.resultTbl[row_idx]) do
 			t_insert(newTbl, { outputAttr = index, index = index })

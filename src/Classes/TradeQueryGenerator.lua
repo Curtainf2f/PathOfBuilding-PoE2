@@ -424,6 +424,14 @@ function TradeQueryGeneratorClass:InitMods()
 end
 
 function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
+	-- Custom begin
+	if self.usingCustomWeightEval then
+		self.calcContext.testItem.explicitModLines[1] = nil
+		self.calcContext.testItem:BuildAndParseRaw()
+		self.calcContext.repNoneOutput = self.calcContext.calcFunc({ repSlotName = self.calcContext.slot.slotName, repItem = self.calcContext.testItem })
+	end
+	-- Custom end
+
 	local start = GetTime()
 	for _, entry in pairs(modsToTest) do
 		if entry[self.calcContext.itemCategory] ~= nil then
@@ -433,6 +441,13 @@ function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
 
 			-- Test with a value halfway (or configured default Item Affix Quality) between the min and max available for this mod in this slot. Note that this can generate slightly different values for the same mod as implicit vs explicit.
 			local tradeModValue = math.ceil((entry[self.calcContext.itemCategory].max - entry[self.calcContext.itemCategory].min) * ( main.defaultItemAffixQuality or 0.5 ) + entry[self.calcContext.itemCategory].min)
+
+			-- Custom begin
+			if self.usingCustomWeightEval then
+				tradeModValue = entry[self.calcContext.itemCategory].max
+			end
+			-- Custom end
+
 			local modValue = tradeModValue
 			-- Apply override text for special cases
 			local modLine
@@ -470,10 +485,20 @@ function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
 			end
 
 			local output = self.calcContext.calcFunc({ repSlotName = self.calcContext.slot.slotName, repItem = self.calcContext.testItem })
-			local meanStatDiff = TradeQueryGeneratorClass.WeightedRatioOutputs(self.calcContext.baseOutput, output, self.calcContext.options.statWeights) * 1000 - (self.calcContext.baseStatValue or 0)
-			if meanStatDiff > 0.01 then
-				t_insert(self.modWeights, { tradeModId = entry.tradeMod.id, weight = meanStatDiff / tradeModValue, meanStatDiff = meanStatDiff })
+
+			-- Custom begin
+			if self.usingCustomWeightEval then
+				local meanStatDiff = self.itemsTab.build.weightEval:WeightedOutputs(self.calcContext.repNoneOutput, output)
+				if meanStatDiff > 0.0001 or meanStatDiff < -0.0001 then
+					t_insert(self.modWeights, { tradeModId = entry.tradeMod.id, weight = meanStatDiff / tradeModValue, meanStatDiff = meanStatDiff })
+				end
+			else
+				local meanStatDiff = TradeQueryGeneratorClass.WeightedRatioOutputs(self.calcContext.baseOutput, output, self.calcContext.options.statWeights) * 1000 - (self.calcContext.baseStatValue or 0)
+				if meanStatDiff > 0.01 then
+					t_insert(self.modWeights, { tradeModId = entry.tradeMod.id, weight = meanStatDiff / tradeModValue, meanStatDiff = meanStatDiff })
+				end
 			end
+			-- Custom end
 			self.alreadyWeightedMods[entry.tradeMod.id] = true
 
 			local now = GetTime()
@@ -925,27 +950,54 @@ function TradeQueryGeneratorClass:RequestQuery(slot, context, statWeights, callb
 		updateLastAnchor(controls.sockets)
 	end
 
-	for i, stat in ipairs(statWeights) do
-		controls["sortStatType"..tostring(i)] = new("LabelControl", {"TOPLEFT",lastItemAnchor,"BOTTOMLEFT"}, {0, i == 1 and 5 or 3, 70, 16}, i < (#statWeights < 6 and 10 or 5) and s_format("^7%.2f: %s", stat.weightMult, stat.label) or ("+ "..tostring(#statWeights - 4).." Additional Stats"))
-		lastItemAnchor = controls["sortStatType"..tostring(i)]
-		popupHeight = popupHeight + 19
-		if i == 1 then
-			controls.sortStatLabel = new("LabelControl", {"RIGHT",lastItemAnchor,"LEFT"}, {-5, 0, 0, 16}, "^7Stat to Sort By:")
-		elseif i == 5 then
-			-- tooltips do not actually work for labels
-			lastItemAnchor.tooltipFunc = function(tooltip)
-				tooltip:Clear()
-				tooltip:AddLine(16, "Sorts the weights by the stats selected multiplied by a value")
-				tooltip:AddLine(16, "Currently sorting by:")
-				for i, stat in ipairs(statWeights) do
-					if i > 4 then
-						tooltip:AddLine(16, s_format("%s: %.2f", stat.label, stat.weightMult))
+	-- CustomBegin
+	if self.queryTab.usingCustomWeightEval then
+		for i, stat in ipairs(self.itemsTab.build.weightEval.statSortSelectionList) do
+			controls["sortStatType"..tostring(i)] = new("LabelControl", {"TOPLEFT",lastItemAnchor,"BOTTOMLEFT"}, {0, i == 1 and 5 or 3, 70, 16}, i < (#statWeights < 6 and 10 or 5) and s_format("^7%.2f: %s", stat.weightMult, stat.label) or ("+ "..tostring(#statWeights - 4).." Additional Stats"))
+			lastItemAnchor = controls["sortStatType"..tostring(i)]
+			popupHeight = popupHeight + 19
+			if i == 1 then
+				controls.sortStatLabel = new("LabelControl", {"RIGHT",lastItemAnchor,"LEFT"}, {-5, 0, 0, 16}, "^7Stat to Sort By:")
+			elseif i == 5 then
+				-- tooltips do not actually work for labels
+				lastItemAnchor.tooltipFunc = function(tooltip)
+					tooltip:Clear()
+					tooltip:AddLine(16, "Sorts the weights by the stats selected multiplied by a value")
+					tooltip:AddLine(16, "Currently sorting by:")
+					for i, stat in ipairs(statWeights) do
+						if i > 4 then
+							tooltip:AddLine(16, s_format("%s: %.2f", stat.label, stat.weightMult))
+						end
 					end
 				end
+				break
 			end
-			break
+		end
+	else
+		for i, stat in ipairs(statWeights) do
+			controls["sortStatType"..tostring(i)] = new("LabelControl", {"TOPLEFT",lastItemAnchor,"BOTTOMLEFT"}, {0, i == 1 and 5 or 3, 70, 16}, i < (#statWeights < 6 and 10 or 5) and s_format("^7%.2f: %s", stat.weightMult, stat.label) or ("+ "..tostring(#statWeights - 4).." Additional Stats"))
+			lastItemAnchor = controls["sortStatType"..tostring(i)]
+			popupHeight = popupHeight + 19
+			if i == 1 then
+				controls.sortStatLabel = new("LabelControl", {"RIGHT",lastItemAnchor,"LEFT"}, {-5, 0, 0, 16}, "^7Stat to Sort By:")
+			elseif i == 5 then
+				-- tooltips do not actually work for labels
+				lastItemAnchor.tooltipFunc = function(tooltip)
+					tooltip:Clear()
+					tooltip:AddLine(16, "Sorts the weights by the stats selected multiplied by a value")
+					tooltip:AddLine(16, "Currently sorting by:")
+					for i, stat in ipairs(statWeights) do
+						if i > 4 then
+							tooltip:AddLine(16, s_format("%s: %.2f", stat.label, stat.weightMult))
+						end
+					end
+				end
+				break
+			end
 		end
 	end
+	-- CustomEnd
+
 	popupHeight = popupHeight + 4
 
 	controls.generateQuery = new("ButtonControl", { "BOTTOM", nil, "BOTTOM" }, {-45, -10, 80, 20}, "Execute", function()
