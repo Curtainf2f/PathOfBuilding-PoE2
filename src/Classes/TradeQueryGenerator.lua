@@ -425,7 +425,7 @@ end
 
 function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
 	-- Custom begin
-	if self.usingCustomWeightEval then
+	if self.queryTab.usingCustomWeightEval then
 		self.calcContext.testItem.explicitModLines[1] = nil
 		self.calcContext.testItem:BuildAndParseRaw()
 		self.calcContext.repNoneOutput = self.calcContext.calcFunc({ repSlotName = self.calcContext.slot.slotName, repItem = self.calcContext.testItem })
@@ -443,7 +443,7 @@ function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
 			local tradeModValue = math.ceil((entry[self.calcContext.itemCategory].max - entry[self.calcContext.itemCategory].min) * ( main.defaultItemAffixQuality or 0.5 ) + entry[self.calcContext.itemCategory].min)
 
 			-- Custom begin
-			if self.usingCustomWeightEval then
+			if self.queryTab.usingCustomWeightEval then
 				tradeModValue = entry[self.calcContext.itemCategory].max
 			end
 			-- Custom end
@@ -487,7 +487,7 @@ function TradeQueryGeneratorClass:GenerateModWeights(modsToTest)
 			local output = self.calcContext.calcFunc({ repSlotName = self.calcContext.slot.slotName, repItem = self.calcContext.testItem })
 
 			-- Custom begin
-			if self.usingCustomWeightEval then
+			if self.queryTab.usingCustomWeightEval then
 				local meanStatDiff = self.itemsTab.build.weightEval:WeightedOutputs(self.calcContext.repNoneOutput, output)
 				if meanStatDiff > 0.0001 or meanStatDiff < -0.0001 then
 					t_insert(self.modWeights, { tradeModId = entry.tradeMod.id, weight = meanStatDiff / tradeModValue, meanStatDiff = meanStatDiff })
