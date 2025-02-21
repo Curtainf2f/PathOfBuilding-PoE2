@@ -94,7 +94,7 @@ function TradeQueryRequestsClass:SearchWithQueryWeightAdjusted(realm, league, qu
 	local previousSearchItems = nil
 	-- Limit recursion to prevent potential loops
 	-- Each repeat is a leap of 10k items, normally we shouldn't need more than 1-2 steps anyways
-	local maxRecursion = 5
+	local maxRecursion = 10
 	local currentRecursion = 0
 	local function performSearchCallback(response, errMsg)
 		currentRecursion = currentRecursion + 1

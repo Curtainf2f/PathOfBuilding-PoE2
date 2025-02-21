@@ -902,6 +902,7 @@ function TradeQueryClass:PriceItemRowDisplay(row_idx, top_pane_alignment_ref, ro
 					self.resultTbl[context.row_idx] = items
 					self:UpdateControlsWithItems(context.row_idx)
 					context.controls["priceButton"..context.row_idx].label =  "Price Item"
+					OpenURL(controls["uri"..context.row_idx].buf)
 				end,
 				{
 					callbackQueryId = function(queryId)
