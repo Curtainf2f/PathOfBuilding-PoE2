@@ -349,13 +349,13 @@ Highest Weight - Displays the order retrieved from trade]]
 	self.controls.itemSortSelectionLabel = new("LabelControl", {"TOPRIGHT", self.controls.itemSortSelection, "TOPLEFT"}, {-4, 0, 60, 16}, "^7Sort By:")
 
 	-- Use Enchant in DPS sorting
+	self.enchantInSort = true
 	self.controls.enchantInSort = new("CheckBoxControl", {"TOPRIGHT",self.controls.fetchCountEdit,"TOPLEFT"}, {-8, 0, row_height}, "Include Enchants:", function(state)
 		self.enchantInSort = state
 		for row_idx, _ in pairs(self.resultTbl) do
 			self:UpdateControlsWithItems(row_idx)
 		end
-	end)
-	self.controls.enchantInSort.tooltipText = "This includes enchants in sorting that occurs after trade results have been retrieved"
+	end, "This includes enchants in sorting that occurs after trade results have been retrieved", true)
 
 	self.controls.updateCurrencyConversion = new("ButtonControl", {"BOTTOMLEFT", nil, "BOTTOMLEFT"}, {pane_margins_horizontal, -pane_margins_vertical, 240, row_height}, "Get Currency Conversion Rates", function()
 		-- self:PullPoENinjaCurrencyConversion(self.pbLeague)
@@ -810,6 +810,10 @@ function TradeQueryClass:SortFetchResults(row_idx, mode)
 			local result = self.resultTbl[row_idx][result_index]
 			local slotName = self.slotTables[row_idx].nodeId and "Jewel " .. tostring(self.slotTables[row_idx].nodeId) or self.slotTables[row_idx].slotName
 			local item = new("Item", result.item_string)
+			if not self.enchantInSort then -- Calc item DPS without anoint or enchant as these can generally be added after.
+				item.enchantModLines = { }
+				item:BuildAndParseRaw()
+			end
 			local output = calcFunc({ repSlotName = slotName, repItem = item })
 			return self.itemsTab.build.weightEval:WeightedOutputs(baseOutput, output)
 		end
