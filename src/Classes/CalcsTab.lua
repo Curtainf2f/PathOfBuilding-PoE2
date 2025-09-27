@@ -557,13 +557,31 @@ function CalcsTabClass:PowerBuilder()
 		if self.nodePowerMaxDepth and self.nodePowerMaxDepth < distance then
 			break
 		end
+		if self.powerStat then
+			ConPrintf(string.format("@dsc powerStat: %s, %s, %s", self.powerStat.label, self.powerStat.stat, self.powerStat.calcWeight))
+		else
+			ConPrintf(string.format("@dsc invalid powerStat"))
+		end
 		for nodeId, node in pairs(nodes) do
 			if not node.alloc and node.modKey ~= "" and not self.mainEnv.grantedPassives[nodeId] then
 				if not cache[node.modKey] then
 					cache[node.modKey] = calcFunc({ addNodes = { [node] = true } }, useFullDPS)
 				end
 				local output = cache[node.modKey]
-				if self.powerStat and self.powerStat.stat and not self.powerStat.ignoreForNodes then
+				if self.powerStat and self.powerStat.calcWeight == true then
+					node.power.singleStat = self.build.weightEval:WeightedOutputs(calcBase, output)
+					if node.path and not node.ascendancyName then
+						newPowerMax.singleStat = m_max(newPowerMax.singleStat, node.power.singleStat)
+						node.power.pathPower = node.power.singleStat
+						local pathNodes = { }
+						for _, node in pairs(node.path) do
+							pathNodes[node] = true
+						end
+						if node.pathDist > 1 then
+							node.power.pathPower = self.build.weightEval:WeightedOutputs(calcBase, calcFunc({ addNodes = pathNodes }, useFullDPS))
+						end
+					end
+				elseif self.powerStat and self.powerStat.stat and not self.powerStat.ignoreForNodes then
 					node.power.singleStat = self:CalculatePowerStat(self.powerStat, output, calcBase)
 					if node.path and not node.ascendancyName then
 						newPowerMax.singleStat = m_max(newPowerMax.singleStat, node.power.singleStat)
@@ -591,7 +609,19 @@ function CalcsTabClass:PowerBuilder()
 					cache[node.modKey.."_remove"] = calcFunc({ removeNodes = { [node] = true } }, useFullDPS)
 				end
 				local output = cache[node.modKey.."_remove"]
-				if self.powerStat and self.powerStat.stat and not self.powerStat.ignoreForNodes then
+				if self.powerStat and self.powerStat.calcWeight == true then
+					node.power.singleStat = self.build.weightEval:WeightedOutputs(calcBase, output)
+					if node.depends and not node.ascendancyName then
+						node.power.pathPower = node.power.singleStat
+						local pathNodes = { }
+						for _, node in pairs(node.depends) do
+							pathNodes[node] = true
+						end
+						if #node.depends > 1 then
+							node.power.pathPower = self.build.weightEval:WeightedOutputs(calcBase, calcFunc({ removeNodes = pathNodes }, useFullDPS))
+						end
+					end
+				elseif self.powerStat and self.powerStat.stat and not self.powerStat.ignoreForNodes then
 					node.power.singleStat = self:CalculatePowerStat(self.powerStat, output, calcBase)
 					if node.depends and not node.ascendancyName then
 						node.power.pathPower = node.power.singleStat
@@ -624,7 +654,9 @@ function CalcsTabClass:PowerBuilder()
 				cache[node.modKey] = calcFunc({ addNodes = { [node] = true } }, useFullDPS)
 			end
 			local output = cache[node.modKey]
-			if self.powerStat and self.powerStat.stat and not self.powerStat.ignoreForNodes then
+			if self.powerStat and self.powerStat.calcWeight == true then
+				node.power.singleStat = self.build.weightEval:WeightedOutputs(calcBase, output)
+			elseif self.powerStat and self.powerStat.stat and not self.powerStat.ignoreForNodes then
 				node.power.singleStat = self:CalculatePowerStat(self.powerStat, output, calcBase)
 			end
 		end

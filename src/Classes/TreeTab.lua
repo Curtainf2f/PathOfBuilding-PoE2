@@ -849,12 +849,18 @@ function TreeTabClass:SetPowerCalc(powerStat)
 	self.build.calcsTab.powerBuildFlag = true
 	self.build.calcsTab.powerStat = powerStat
 	self.controls.powerReportList:SetReport(powerStat, nil)
+	ConPrintf(string.format("@dsc SetPowerCalc: %s", powerStat and powerStat.label or nil))
 end
 
 function TreeTabClass:BuildPowerReportList(currentStat)
 	local report = {}
 
-	if not (currentStat and currentStat.stat) then
+	if currentStat then
+		ConPrintf(string.format("@dsc currentStat: %s, %s, %s", currentStat.label, currentStat.stat, currentStat.calcWeight))
+	else
+		ConPrintf(string.format("@dsc invalid currentStat"))
+	end
+	if not (currentStat and (currentStat.stat or currentStat.calcWeight == true)) then
 		return report
 	end
 
@@ -863,10 +869,12 @@ function TreeTabClass:BuildPowerReportList(currentStat)
 	-- in the code that has this information in a tidy place.
 	local displayStat = nil
 
-	for index, ds in ipairs(self.build.displayStats) do
-		if ds.stat == currentStat.stat then
-			displayStat = ds
-			break
+	if currentStat.stat ~= nil then
+		for index, ds in ipairs(self.build.displayStats) do
+			if ds.stat == currentStat.stat then
+				displayStat = ds
+				break
+			end
 		end
 	end
 
@@ -876,7 +884,7 @@ function TreeTabClass:BuildPowerReportList(currentStat)
 	-- If no corresponding stat is found, just default to a generic stat display (>0=good, one digit of precision).
 	if not displayStat then
 		displayStat = {
-			fmt = ".1f"
+			fmt = ".4f"
 		}
 	end
 
