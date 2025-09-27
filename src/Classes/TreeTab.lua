@@ -397,7 +397,7 @@ function TreeTabClass:Draw(viewPort, inputEvents)
 	self.controls.treeHeatMapStatSelect.selIndex = 1
 	self.controls.treeHeatMapStatSelect:CheckDroppedWidth(true)
 	if self.build.calcsTab.powerStat then
-		self.controls.treeHeatMapStatSelect:SelByValue(self.build.calcsTab.powerStat.stat, "stat")
+		self.controls.treeHeatMapStatSelect:SelByValue(self.build.calcsTab.powerStat.label, "label")
 	end
 
 	SetDrawLayer(1)
@@ -849,7 +849,6 @@ function TreeTabClass:SetPowerCalc(powerStat)
 	self.build.calcsTab.powerBuildFlag = true
 	self.build.calcsTab.powerStat = powerStat
 	self.controls.powerReportList:SetReport(powerStat, nil)
-	ConPrintf(string.format("@dsc SetPowerCalc: %s", powerStat and powerStat.label or nil))
 end
 
 function TreeTabClass:BuildPowerReportList(currentStat)
