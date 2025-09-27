@@ -183,6 +183,7 @@ function CalcBreakdownClass:AddBreakdownSection(sectionData)
 				{ label = "More/less", key = "more" },
 				{ label = "Inc/red", key = "inc" },
 				{ label = "Efficiency", key = "efficiency" },
+				{ label = "Count", key = "count" },
 				{ label = "Reservation", key = "total" },
 			}
 		}
@@ -397,7 +398,11 @@ function CalcBreakdownClass:AddModSection(sectionData, modList)
 			if item then
 				row.sourceName = colorCodes[item.rarity]..item.name
 				row.sourceNameTooltip = function(tooltip)
-					build.itemsTab:AddItemTooltip(tooltip, item, row.mod.sourceSlot)
+					local args = row.mod.sourceSlot
+					if row.mod.sourceSlot == "Jewel" and row.mod.sourceSlotNum ~= nil and build.spec.nodes[row.mod.sourceSlotNum] and build.spec.nodes[row.mod.sourceSlotNum].containJewelSocket then
+						args = { nodeId = row.mod.sourceSlotNum }
+					end
+					build.itemsTab:AddItemTooltip(tooltip, item, args)
 				end
 			end
 		elseif sourceType == "Tree" then

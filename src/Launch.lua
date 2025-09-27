@@ -268,6 +268,7 @@ function launch:DownloadPage(url, callback, params)
 		easy:setopt_url(url)
 		easy:setopt(curl.OPT_USERAGENT, "Path of Building/]]..self.versionNumber..[[")
 		easy:setopt(curl.OPT_ACCEPT_ENCODING, "")
+		easy:setopt(curl.OPT_FOLLOWLOCATION, 1)
 		if requestBody then
 			easy:setopt(curl.OPT_POST, true)
 			easy:setopt(curl.OPT_POSTFIELDS, requestBody)
@@ -298,13 +299,13 @@ function launch:DownloadPage(url, callback, params)
 			errMsg = "No data returned"
 		end
 		ConPrintf("Download complete. Status: %s", errMsg or "OK")
-		return responseHeader, responseBody, errMsg
+		return responseBody, errMsg, responseHeader
 	]]
 	local id = LaunchSubScript(script, "", "ConPrintf", url, params.header, params.body, self.connectionProtocol, self.proxyURL)
 	if id then
 		self.subScripts[id] = {
 			type = "DOWNLOAD",
-			callback = function(responseHeader, responseBody, errMsg)
+			callback = function(responseBody, errMsg, responseHeader)
 				callback({header=responseHeader, body=responseBody}, errMsg)
 			end
 		}
@@ -350,6 +351,9 @@ function launch:ShowPrompt(r, g, b, str, func)
 	self.promptFunc = func or function(key)
 		if key == "RETURN" or key == "ESCAPE" then
 			return true
+		elseif key == "c" and IsKeyDown("CTRL") then
+			local cleanStr = str:gsub("%^%d", "")
+			Copy(cleanStr)
 		elseif key == "F5" then
 			self.doRestart = "Restarting..."
 			return true
@@ -362,7 +366,7 @@ function launch:ShowErrMsg(fmt, ...)
 		local version = self.versionNumber and 
 			"^8v"..self.versionNumber..(self.versionBranch and " "..self.versionBranch or "")
 			or ""
-		self:ShowPrompt(1, 0, 0, "^1Error:\n\n^0"..string.format(fmt, ...).."\n"..version.."\n^0Press Enter/Escape to dismiss, or F5 to restart the application.")
+		self:ShowPrompt(1, 0, 0, "^1Error:\n\n^0"..string.format(fmt, ...).."\n"..version.."\n^0Press Enter/Escape to dismiss, or F5 to restart the application.\nPress CTRL + C to copy error text.")
 	end
 end
 

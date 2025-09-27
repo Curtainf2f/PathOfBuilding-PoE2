@@ -157,7 +157,7 @@ local TreeTabClass = newClass("TreeTab", "ControlHost", function(self, build)
 		self.viewer.searchStr = buf
 		self.searchFlag = buf ~= self.viewer.searchStrSaved
 	end, nil, nil, true)
-	self.controls.treeSearch.tooltipText = "Uses Lua pattern matching for complex searches\nPrefix your search with \"oil:\" to search by anoint recipe"
+	self.controls.treeSearch.tooltipText = "Uses Lua pattern matching for complex searches.\nPrefix your search with \"oil:\" to search by anoint recipe.\nTo search for multiple terms: (increased.fire.damage|increased.area.of.effect|etc)"
 
 	self.tradeLeaguesList = { }
 	-- Find Timeless Jewel Button
@@ -482,6 +482,7 @@ function TreeTabClass:SetActiveSpec(specId)
 	self.build.spec = curSpec
 	self.build.buildFlag = true
 	self.build.spec:SetWindowTitleWithBuildClass()
+	self.build:UpdateClassDropdowns(curSpec.treeVersion)
 	for _, slot in pairs(self.build.itemsTab.slots) do
 		if slot.nodeId then
 			if prevSpec then
@@ -790,7 +791,9 @@ function TreeTabClass:ModifyAttributePopup(hoverNode)
 	controls.hotkeyTooltip = new("LabelControl", nil, {0, 100, 0, 16}, 
 		"^8You can switch attributes quicker by holding hotkeys while allocating:\n"..colorCodes.INTELLIGENCE.."\"1\" or \"I\" for Intelligence, "
 		..colorCodes.STRENGTH.."\"2\" or \"S\" for Strength, "..colorCodes.DEXTERITY.."\"3\" or \"D\" for Dexterity\n\n"
-		..colorCodes.RARE.."Right-click ^8an attribute node to instantly allocate with your last used attribute")
+		..colorCodes.RARE.."Right-click ^8an allocated node to toggle attribute types or to set an\n" .. 
+		"unallocated node to your last used attribute\n\n"
+	)
 	main:OpenPopup(550, 185, "Choose Attribute", controls, "save")
 end
 

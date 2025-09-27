@@ -15,38 +15,16 @@ return {
 						[2]="#"
 					}
 				},
-				text="Poison Spread radius on Kill {0}m"
-			},
-			[2]={
-				[1]={
-					k="divide_by_ten_1dp_if_required",
-					v=1
-				},
-				limit={
-					[1]={
-						[1]="#",
-						[2]="#"
-					}
-				},
 				text="Spreads the most Damaging Poison on enemies you kill in a {0} metre radius"
 			}
 		},
 		stats={
-			[1]="herald_of_agony_poison_on_enemies_you_kill_spread_to_enemies_within_x"
+			[1]="herald_of_agony_poison_spread_on_kill_radius_base_magnitude_to_grant"
 		}
 	},
 	[2]={
 		[1]={
 			[1]={
-				limit={
-					[1]={
-						[1]="#",
-						[2]="#"
-					}
-				},
-				text="Chance to Hinder on spreading Poison {0}%"
-			},
-			[2]={
 				limit={
 					[1]={
 						[1]="#",
@@ -60,7 +38,7 @@ return {
 			[1]="hinder_chance_%_on_spreading_poioson"
 		}
 	},
-	["herald_of_agony_poison_on_enemies_you_kill_spread_to_enemies_within_x"]=1,
+	["herald_of_agony_poison_spread_on_kill_radius_base_magnitude_to_grant"]=1,
 	["hinder_chance_%_on_spreading_poioson"]=2,
 	parent="skill_stat_descriptions"
 }
