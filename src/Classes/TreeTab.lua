@@ -854,11 +854,6 @@ end
 function TreeTabClass:BuildPowerReportList(currentStat)
 	local report = {}
 
-	if currentStat then
-		ConPrintf(string.format("@dsc currentStat: %s, %s, %s", currentStat.label, currentStat.stat, currentStat.calcWeight))
-	else
-		ConPrintf(string.format("@dsc invalid currentStat"))
-	end
 	if not (currentStat and (currentStat.stat or currentStat.calcWeight == true)) then
 		return report
 	end

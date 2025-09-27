@@ -5,6 +5,7 @@
 --
 
 local dkjson = require "dkjson"
+local const = require "Const"
 local curl = require("lcurl.safe")
 local m_max = math.max
 local s_format = string.format
@@ -106,7 +107,7 @@ end)
 local function fetchStats()
 	local tradeStats = ""
 	local easy = common.curl.easy()
-	easy:setopt_url("https://www.pathofexile.com/api/trade2/data/stats")
+	easy:setopt_url(const.TradeURL .. "api/trade2/data/stats")
 	easy:setopt_useragent("Path of Building/" .. launch.versionNumber)
 	easy:setopt_writefunction(function(data)
 		tradeStats = tradeStats..data

@@ -557,11 +557,6 @@ function CalcsTabClass:PowerBuilder()
 		if self.nodePowerMaxDepth and self.nodePowerMaxDepth < distance then
 			break
 		end
-		if self.powerStat then
-			ConPrintf(string.format("@dsc powerStat: %s, %s, %s", self.powerStat.label, self.powerStat.stat, self.powerStat.calcWeight))
-		else
-			ConPrintf(string.format("@dsc invalid powerStat"))
-		end
 		for nodeId, node in pairs(nodes) do
 			if not node.alloc and node.modKey ~= "" and not self.mainEnv.grantedPassives[nodeId] then
 				if not cache[node.modKey] then

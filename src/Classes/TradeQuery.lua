@@ -6,6 +6,7 @@
 
 
 local dkjson = require "dkjson"
+local const = require "Const"
 
 local get_time = os.time
 local t_insert = table.insert
@@ -57,14 +58,15 @@ local TradeQueryClass = newClass("TradeQuery", function(self, itemsTab)
 	end
 
 	-- set
-	self.hostName = "https://www.pathofexile.com/"
+	self.hostName = const.TradeURL
+	-- self.hostName = "https://www.pathofexile.com/"
 end)
 
 ---Fetch currency short-names from Poe API (used for PoeNinja price pairing)
 ---@param callback fun()
 function TradeQueryClass:FetchCurrencyConversionTable(callback)
 	launch:DownloadPage(
-		"https://www.pathofexile.com/api/trade2/data/static",
+		string.format(self.hostName .. "api/trade2/data/static"),
 		function(response, errMsg)
 			if errMsg then
 				callback(response, errMsg)

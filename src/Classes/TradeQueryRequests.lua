@@ -5,6 +5,7 @@
 --
 
 local dkjson = require "dkjson"
+local const = require "Const"
 
 ---@class TradeQueryRequests
 local TradeQueryRequestsClass = newClass("TradeQueryRequests", function(self, rateLimiter)
@@ -15,7 +16,8 @@ local TradeQueryRequestsClass = newClass("TradeQueryRequests", function(self, ra
 		["search"] = {},
 		["fetch"] = {},
 	}
-	self.hostName = "https://www.pathofexile.com/"
+	self.hostName = const.GlobalURL
+	-- self.hostName = "https://www.pathofexile.com/"
 end)
 
 ---Main routine for processing request queue
