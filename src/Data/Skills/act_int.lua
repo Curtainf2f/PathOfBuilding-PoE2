@@ -16850,8 +16850,7 @@ skills["SacrificePlayer"] = {
 			statDescriptionScope = "harvester",
 			statMap = {
 				["harvester_minion_resummon_speed_+%_final"] = {
-					mod("MinionRevivalTime", "MORE", nil, 0, 0, { type = "GlobalEffect", effectType = "Buff" } ),
-					mult = -1,
+					mod("MinionRevivalSpeed", "MORE", nil, 0, 0, { type = "GlobalEffect", effectType = "Buff" } ),
 				},
 			},
 			baseFlags = {
@@ -18613,6 +18612,11 @@ skills["SnapPlayer"] = {
 			incrementalEffectiveness = 0.12999999523163,
 			damageIncrementalEffectiveness = 0.0096000004559755,
 			statDescriptionScope = "shatter",
+			statMap = {
+				["snap_damage_+%_final_if_created_from_unique"] = {
+					mod("Damage", "MORE", nil, 0, 0, { type = "ActorCondition", actor = "enemy", var = "Unique" }),
+				},
+			},
 			baseFlags = {
 				area = true,
 				spell = true,
