@@ -48,6 +48,7 @@ colorCodes = {
 	SHAPER = "^x55BBFF",
 	ELDER = "^xAA77CC",
 	FRACTURED = "^xA29160",
+	MUTATED = "^xAE2E3B",
 	ADJUDICATOR = "^xE9F831",
 	BASILISK = "^x00CB3A",
 	CRUSADER = "^x2946FC",
@@ -62,6 +63,7 @@ colorCodes = {
 	SAPBG = "^x261500",
 	SCOURGE = "^xFF6E25",
 	CRUCIBLE = "^xFFA500",
+	GEMDESCRIPTION = "^xBAAD85",
 }
 colorCodes.STRENGTH = colorCodes.MARAUDER
 colorCodes.DEXTERITY = colorCodes.RANGER
@@ -244,12 +246,13 @@ ModFlag.Crossbow =	 0x0000000004000000
 ModFlag.Flail =		 0x0000000008000000
 ModFlag.Spear =		 0x0000000010000000
 ModFlag.Warstaff =	 0x0000000020000000
+ModFlag.Talisman =	 0x0000000040000000
 -- Weapon classes
 ModFlag.WeaponMelee =0x0000000100000000
 ModFlag.WeaponRanged=0x0000000200000000
 ModFlag.Weapon1H =	 0x0000000400000000
 ModFlag.Weapon2H =	 0x0000000800000000
-ModFlag.WeaponMask = 0x0000000F1FFF0000
+ModFlag.WeaponMask = 0x0000000F5FFF0000
 
 KeywordFlag = { }
 -- Skill keywords
@@ -417,33 +420,33 @@ SkillType = {
 	Blink = 80,
 	CanHaveBlessing = 81,
 	ProjectilesNotFromUser = 82,
+	AttackInPlace = 83,
 	AttackInPlaceIsDefault = 83,
-	Nova = 84,
-	InstantNoRepeatWhenHeld = 85,
-	InstantShiftAttackForLeftMouse = 86,
-	AuraNotOnCaster = 87,
-	Banner = 88,
-	Rain = 89,
-	Cooldown = 90,
-	ThresholdJewelChaining = 91,
-	Slam = 92,
-	Stance = 93,
-	NonRepeatable = 94, -- Blood and Sand + Flesh and Stone
-	UsedByTotem = 95,
-	Steel = 96,
-	Hex = 97,
-	Mark = 98,
-	Aegis = 99,
-	Orb = 100,
-	KillNoDamageModifiers = 101,
-	RandomElement = 102, -- means elements cannot repeat
-	LateConsumeCooldown = 103,
-	Arcane = 104, -- means it is reliant on amount of mana spent
-	FixedCastTime = 105,
-	RequiresOffHandNotWeapon = 106,
-	Link = 107,
-	Blessing = 108,
-	ZeroReservation = 109,
+	Nova = 85,
+	InstantNoRepeatWhenHeld = 86,
+	InstantShiftAttackForLeftMouse = 87,
+	AuraNotOnCaster = 88,
+	Banner = 89,
+	Rain = 90,
+	Cooldown = 91,
+	ThresholdJewelChaining = 92,
+	Slam = 93,
+	Stance = 94,
+	NonRepeatable = 95, -- Blood and Sand + Flesh and Stone
+	UsedByTotem = 96,
+	Steel = 97,
+	Hex = 98,
+	Mark = 99,
+	Aegis = 100,
+	Orb = 101,
+	KillNoDamageModifiers = 102,
+	RandomElement = 103, -- means elements cannot repeat
+	LateConsumeCooldown = 104,
+	Arcane = 105, -- means it is reliant on amount of mana spent
+	FixedCastTime = 106,
+	RequiresOffHandNotWeapon = 107,
+	Link = 108,
+	Blessing = 109,
 	DynamicCooldown = 110,
 	Microtransaction = 111,
 	OwnerCannotUse = 112,
@@ -583,7 +586,24 @@ SkillType = {
 	CanCreateStoneElementals = 246,
 	RemnantCannotBeShared = 247,
 	GamepadDoNotForceSkillAtLocation = 248,
+	GamepadDeflectable = 249,
+	GamepadForceAllowInteraction = 250,
+	Wyvern = 251,
+	Plant = 252,
+	Wind = 253,
+	SupportedByHayoxi = 254,
+	Storm = 255,
+	DisableUpdateActionLocationAfterRelease = 256,
+	InteractsWithElementalGround = 257,
+	SupportedByNovaProjectiles = 258,
+	Proxy = 259,
 }
+
+-- build reverse lookup
+SkillTypeName = {}
+for k, v in pairs(SkillType) do
+  SkillTypeName[v] = k
+end
 
 GlobalCache = { 
 	cachedData = { MAIN = {}, CALCS = {}, CALCULATOR = {}, CACHE = {}, },

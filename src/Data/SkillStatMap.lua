@@ -281,6 +281,9 @@ return {
 ["support_spell_echo_number_of_echo_cascades"] = {
 	mod("RepeatCount", "BASE", nil, 0, 0, {type = "SkillType", skillType = SkillType.Cascadable }),
 },
+["support_spell_echo_area_of_effect_+%"] = {
+	mod("RepeatAreaOfEffect", "INC", nil),
+},
 ["base_melee_attack_repeat_count"] = {
 	mod("RepeatCount", "BASE", nil, 0, 0, { type = "ModFlagOr", modFlags = bit.bor(ModFlag.WeaponMelee, ModFlag.Unarmed) }),
 	mod("RepeatCount", "BASE", nil, 0, 0, { type = "SkillType", skillType = SkillType.RequiresShield }),
@@ -400,6 +403,13 @@ return {
 ["no_mana_cost"] = {
 	mod("ManaCost", "MORE", nil),
 	value = -100,
+},
+["no_cost"] = {
+	mod("Cost", "MORE", nil),
+	value = -100,
+},
+["base_mana_cost_efficiency_"] = {
+	mod("ManaCostEfficiency", "INC", nil),
 },
 ["base_life_cost_+%"] = {
 	mod("LifeCost", "INC", nil),
@@ -955,6 +965,9 @@ return {
 ["attack_damage_is_lucky_if_surrounded"] = {
 	flag("LuckyHits", { type = "Condition", var = "Surrounded" })
 },
+["attacks_roll_crits_twice"] = {
+	flag("BifurcateCrit", { type = "SkillType", skillType = SkillType.Attack } )
+},
 ["damage_vs_enemies_on_low_life_+%"] = {
 	mod("Damage", "INC", nil, ModFlag.Hit, 0, { type = "ActorCondition", actor = "enemy", var = "LowLife"})
 },
@@ -1155,7 +1168,10 @@ return {
 },
 -- Ailments
 ["skill_overwhelming_pressure_aura_enemy_ailment_threshold_+%"] = {
-	mod("AilmentThreshold", "INC", nil, 0, 0, { type = "GlobalEffect", effectType = "Debuff", effectName = "Overwhelming Presence"}),
+	mod("EnemyAilmentThreshold", "INC", nil, 0, 0, { type = "GlobalEffect", effectType = "AuraDebuff", effectName = "Overwhelming Presence"}),
+},
+["skill_overwhelming_pressure_aura_enemy_stun_threshold_+%"] = {
+	mod("EnemyStunThreshold", "INC", nil, 0, 0, { type = "GlobalEffect", effectType = "AuraDebuff", effectName = "Overwhelming Presence"}),
 },
 ["bleed_on_hit_with_attacks_%"] = {
 	mod("BleedChance", "BASE", nil, ModFlag.Attack),
@@ -1294,10 +1310,13 @@ return {
 ["active_skill_shock_effect_+%_final"] = {
 	mod("EnemyShockMagnitude", "MORE", nil),
 },
+["active_skill_electrocutes_as_though_dealt_damage_+%_final"] = {
+	mod("EnemyElectrocuteBuildup", "MORE", nil),
+},
 ["non_damaging_ailment_effect_+%"] = {
 	mod("EnemyChillMagnitude", "INC", nil),
 	mod("EnemyShockMagnitude", "INC", nil),
-	mod("EnemyFreezeEffect", "INC", nil),
+	mod("EnemyFreezeBuildup", "INC", nil),
 },
 ["lightning_ailment_effect_+%"] = {
 	mod("EnemyShockMagnitude", "INC", nil),
@@ -1312,10 +1331,16 @@ return {
 },
 ["cold_ailment_effect_+%"] = {
 	mod("EnemyChillMagnitude", "INC", nil),
-	mod("EnemyFreezeEffect", "INC", nil),
+	mod("EnemyFreezeBuildup", "INC", nil),
+},
+["hit_damage_freeze_multiplier_+%"] = {
+	mod("EnemyFreezeBuildup", "INC", nil),
 },
 ["active_skill_hit_damage_freeze_multiplier_+%_final"] = {
-	mod("EnemyFreezeEffect", "MORE", nil),
+	mod("EnemyFreezeBuildup", "MORE", nil),
+},
+["support_hypothermia_hit_damage_freeze_multiplier_+%_final"] = {
+	mod("EnemyFreezeBuildup", "MORE", nil),
 },
 ["base_poison_effect_+%"] = {
 	mod("AilmentEffect", "INC", nil),
@@ -1372,6 +1397,9 @@ return {
 ["base_poison_damage_+%"] = {
 	mod("Damage", "INC", nil, 0, KeywordFlag.Poison),
 },
+["active_skill_poison_effect_+%_final"] = {
+	mod("AilmentMagnitude", "MORE", nil, 0, KeywordFlag.Poison),
+},
 ["critical_poison_dot_multiplier_+"] = {
 	mod("DotMultiplier", "BASE", nil, 0, KeywordFlag.Poison, { type = "Condition", var = "CriticalStrike" }),
 },
@@ -1422,6 +1450,10 @@ return {
 ["shock_minimum_damage_taken_increase_%+"] = {
 	mod("ShockMinimum", "BASE", nil),
 },
+["active_skill_pins_as_though_dealt_damage_+%_final"] = {
+	mod("EnemyPinBuildup", "MORE", nil),
+},
+
 -- Global flags
 ["never_ignite"] = {
 	flag("CannotIgnite"),
@@ -1438,6 +1470,13 @@ return {
 },
 ["never_chill"] = {
 	flag("CannotChill"),
+},
+["cannot_pin"] = {
+	flag("CannotPin"),
+},
+["cannot_stun"] = {
+	flag("CannotHeavyStun"),
+	flag("CannotStun"),
 },
 ["cannot_cause_bleeding"] = {
 	flag("CannotBleed"),
@@ -1491,11 +1530,28 @@ return {
 	flag("FireCanShock"),
 	flag("ChaosCanShock"),
 },
+["chaos_damage_can_freeze"] = {
+	flag("ChaosCanFreeze"),
+},
 ["base_chaos_damage_can_ignite"] = {
 	flag("ChaosCanIgnite"),
 },
 ["base_lightning_damage_can_electrocute"] = {
 	flag("LightningCanElectrocute"),
+},
+["base_all_damage_can_pin"] = {
+	flag("CanPin"),
+},
+["support_pin_physical_damage_can_pin"] = {
+	flag("PhysicalCanPin"),
+},
+["support_pin_buildup_pin_instead_of_stun"] = {
+	flag("PinBuildupInsteadOfHeavyStunBuildup"),
+	flag("CannotStun"),
+	flag("CannotHeavyStun"),
+},
+["support_pin_pin_buildup_+%_final"] = {
+	mod("EnemyPinBuildup", "MORE", nil),
 },
 ["is_hazard"] = {
 	flag("CanCreateHazards"),
@@ -1512,6 +1568,15 @@ return {
 ["impale_phys_reduction_%_penalty"] = {
 	mod("EnemyImpalePhysicalDamageReduction", "BASE", nil),
 	mult = -1,
+},
+["support_brink_hit_damage_stun_multiplier_+%_final"] = {
+	mod("EnemyHeavyStunBuildup", "MORE", nil),
+},
+["active_skill_hit_damage_stun_multiplier_+%_final"] = {
+	mod("EnemyHeavyStunBuildup", "MORE", nil),
+},
+["active_skill_minion_hit_damage_stun_multiplier_+%_final"] = {
+	mod("MinionModifier", "LIST", { mod = mod("EnemyHeavyStunBuildup", "MORE", nil) }),
 },
 ["base_stun_duration_+%"] = {
 	mod("EnemyStunDuration", "INC", nil),
@@ -1568,6 +1633,12 @@ return {
 },
 ["base_inflict_fire_exposure_on_hit_%_chance"] = {
 	mod("FireExposureChance", "BASE", nil),
+},
+["all_exposure_on_hit_magnitude"] = {
+	mod("FireExposure", "BASE", nil, 0, 0, { type = "GlobalEffect", effectType = "Debuff" }),
+	mod("ColdExposure", "BASE", nil, 0, 0, { type = "GlobalEffect", effectType = "Debuff" }),
+	mod("LightningExposure", "BASE", nil, 0, 0, { type = "GlobalEffect", effectType = "Debuff" }),
+	mult = -1,
 },
 ["offering_spells_effect_+%"] = {
 	mod("BuffEffect", "INC", nil),
@@ -2345,6 +2416,12 @@ return {
 ["number_of_spider_minions_allowed"] = {
 	mod("ActiveSpiderLimit", "BASE", nil),
 },
+["skill_hyena_cackle_size"] = {
+	mod("HyenaLimit", "BASE", nil),
+},
+["maximum_corpse_beetles_allowed"] = {
+	mod("BeetleLimit", "BASE", nil),
+},
 ["active_skill_minion_damage_+%_final"] = {
 	mod("MinionModifier", "LIST", { mod = mod("Damage", "MORE", nil) }),
 },
@@ -2522,6 +2599,9 @@ return {
 	mod("CrossbowBoltCount", "BASE", nil)
 },
 ["projectiles_crossbow_barrage"] = {
+	flag("SequentialProjectiles"),
+},
+["projectiles_barrage"] = {
 	flag("SequentialProjectiles"),
 },
 ["crossbow_barrage_attack_time_ratio_%"] = {
@@ -2820,6 +2900,12 @@ return {
 	-- Display Only
 },
 ["quality_display_supercharged_slam_is_gem"] = {
+	-- Display Only
+},
+["quality_display_active_skill_pins_as_though_dealt_damage_+%_final_is_gem"] = {
+	-- Display Only
+},
+["quality_display_freezing_mark_is_gem"] = {
 	-- Display Only
 },
 }
